@@ -15,4 +15,5 @@ Equations by [codecogs equation editor](https://latex.codecogs.com/)
 <img src="https://latex.codecogs.com/svg.image?\textit{l}\left&space;(&space;y,&space;\hat{y}\right&space;)&space;=&space;\frac{1}{2}\left&space;(&space;y-\hat{y}&space;\right&space;)^{2}" title="\textit{l}\left ( y, \hat{y}\right ) = \frac{1}{2}\left ( y-\hat{y} \right )^{2}" />
 
 
+##
 
