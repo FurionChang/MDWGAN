@@ -107,7 +107,8 @@ class WGenerator_3d(nn.Module):
         super(WGenerator_3d, self).__init__()
         self.g1 = WG_block_3d(in_channels=in_channels,out_channels=512,kernel_size=4,strides=2,padding=1)
         self.g2 = WG_block_3d(in_channels=512,out_channels=256,kernel_size=4,strides=2,padding=1)
-        self.g3 = WG_block_3d(in_channels=256,out_channels=out_channels,kernel_size=3,strides=1,padding=0)
+        self.g3 = nn.ConvTranspose3d(in_channels=256, out_channels=out_channels,kernel_size=3,stride=1, padding=0,bias=False)
+        #self.g3 = WG_block_3d(in_channels=256,out_channels=out_channels,kernel_size=3,strides=1,padding=0)
         self.output = nn.Tanh()
 
     def forward(self, X):
@@ -115,21 +116,22 @@ class WGenerator_3d(nn.Module):
         out = self.g2(out)
         out = self.g3(out)
         out = self.output(out)
-        out = out+1
+        out = out/2+1.5
         return out
 
 
 class WGAN_GP(object):
-    def __init__(self,G_path,D_path, G_channels=100,D_channels=2):
+    def __init__(self,G_path,D_path, G_channels=100,D_channels=2,epochs=100):
         self.G_path = G_path
         self.D_path = D_path
         if not os.path.exists(self.G_path):
             os.mkdir(self.G_path)
         if not os.path.exists(self.D_path):
             os.mkdir(self.D_path)
-        self.G = WGenerator_3d(G_channels,out_channels=1)
-        self.D = WDiscriminator_3d(1)
+        self.G = WGenerator_3d(G_channels,out_channels=D_channels)
+        self.D = WDiscriminator_3d(D_channels)
 
+        self.moduli_cal = torch.load('./moduli_cal_model/total_50_lr_0.0005_epoch_45_moduli_cal_1.pt').cuda()
         # Check if cuda is available
         self.cuda = True if torch.cuda.is_available() else False
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -152,8 +154,8 @@ class WGAN_GP(object):
         self.logger.writer.flush()
         self.number_of_images = 10
         '''
-
-        self.epochs = 100
+        self.moduli_critic = nn.MSELoss(reduction='sum')
+        self.epochs = epochs
         self.generator_iters = 2500
         self.critic_iter = 3
         self.lambda_term = 10
@@ -239,6 +241,24 @@ class WGAN_GP(object):
                 g_loss = self.D(fake_images)
                 g_loss = g_loss.mean()
                 g_loss.backward(mone)
+                
+                '''
+                # Loss G2: moduli loss
+                z = self.get_torch_variable(torch.randn(self.batch_size, 100, 1, 1, 1))
+                fake_images = self.G(z)
+                m_loss_goal = torch.tensor(1.8, dtype=torch.float)
+                m_loss = self.moduli_cal(fake_images)
+                m_loss = m_loss.mean()
+                m_loss.backward(m_loss_goal)
+                
+                # Loss G3: symm loss
+                z = self.get_torch_variable(torch.randn(self.batch_size, 100, 1, 1, 1))
+                fake_images = self.G(z)
+                s_loss = self.moduli_cal(fake_images)
+                s_loss = self.calculate_moduli_symm_loss(s_loss)
+                s_loss.backward()
+                '''
+                
                 #g_cost = -g_loss
                 self.g_optimizer.step()
                 g_iter_tqdm.set_postfix(OrderedDict(stage='train',epoch=epoch,loss=-g_loss.item()))
@@ -256,6 +276,9 @@ class WGAN_GP(object):
         # Save the trained parameters
         self.save_model(self.epochs)
 
+    def calculate_moduli_symm_loss(self,moduli):
+        symm_moduli = torch.cat((moduli[:,1:],moduli[:,:1]),dim=1)
+        return self.moduli_critic(moduli,symm_moduli)
 
     # TO BE MODIFIED
     def evaluate(self, test_loader, D_model_path, G_model_path):
@@ -347,6 +370,7 @@ class WGAN_GP(object):
             z = self.get_torch_variable(torch.randn(self.batch_size, 100, 1, 1, 1))
             sample = self.G(z)
             temp_path = path+'sample_'+str(i)+'.pt'
+            print(sample)
             torch.save(sample,temp_path)
 
     def generate_latent_walk(self, number):
