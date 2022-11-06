@@ -16,7 +16,7 @@ from utils import num_to_cor,elemsplot,load_array,transfer_gan_out,transfer_1d_t
 size_ele_random = [6,6,6]
 size_ele_symm = [3,3,3]
 lr = 0.0005
-batch_size = 8
+batch_size = 32
 num_epochs = 100
 
 
