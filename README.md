@@ -3,7 +3,8 @@ This repo exhibits the code and data of the paper titled "Multi-objective Genera
 
 * Code
 
-DC_GAN and LS_GAN were the models we modified before Wasserstein distance was confirmed as the best  with best performance for this task.
+DC_GAN and LS_GAN branch were the models we modified before Wasserstein distance was confirmed as the best  with best performance for this task.
+In WGAN branch, ……
 
 * Dataset
 
