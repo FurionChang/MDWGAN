@@ -83,9 +83,9 @@ path_z = output_path+'moduli_z_real.pt'
 torch.save(real_x_moduli,path_x)
 torch.save(real_y_moduli,path_y)
 torch.save(real_z_moduli,path_z)
-path_x_1 = './figure/moduli_x_fake.pt'
-path_y_1 = './figure/moduli_y_fake.pt'
-path_z_1 = './figure/moduli_z_fake.pt'
+path_x_1 = output_path+'moduli_x_fake.pt'
+path_y_1 = output_path+'moduli_y_fake.pt'
+path_z_1 = output_path+'moduli_z_fake.pt'
 torch.save(fake_x_moduli,path_x_1)
 torch.save(fake_y_moduli,path_y_1)
 torch.save(fake_z_moduli,path_z_1)
