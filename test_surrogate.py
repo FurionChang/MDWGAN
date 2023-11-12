@@ -4,15 +4,23 @@ import numpy as np
 from torch.utils import data
 from utils import load_array
 import matplotlib.pyplot as plt
+import argparse
 
 size_ele_random = [6,6,6]
 lr = 0.001
 batch_size = 32
 num_epochs = 30
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_path", type=str, default="./surr_model/2_channel_model/",help="address of saved model")
+parser.add_argument("--output_path", type=str, default="./",help="address of output")
+args = vars(parser.parse_args())
+model_path = args['model_path']
+output_path = args['output_path']
 
-model = torch.load('./surr_model/total_100_lr_0.001_moduli_cal_2_channel_batch_32.pt').cuda()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = torch.load(model_path).to(device)
+
 
 print('data loading...')
 print('load random data...')
@@ -69,9 +77,9 @@ print(real_moduli_var_z)
 print("MSE between real moduli and fake moduli on z axis is: ")
 print(mse_moduli_z)
 
-path_x = './figure/moduli_x_real.pt'
-path_y = './figure/moduli_y_real.pt'
-path_z = './figure/moduli_z_real.pt'
+path_x = output_path+'moduli_x_real.pt'
+path_y = output_path+'moduli_y_real.pt'
+path_z = output_path+'moduli_z_real.pt'
 torch.save(real_x_moduli,path_x)
 torch.save(real_y_moduli,path_y)
 torch.save(real_z_moduli,path_z)
@@ -97,7 +105,7 @@ ax.spines['bottom'].set_linewidth(5)
 ax.spines['top'].set_linewidth(5)
 ax.spines['left'].set_linewidth(5)
 ax.spines['right'].set_linewidth(5)
-path = 'X_moduli_plot_batch_'+str(batch_size)+'.png'
+path = output_path+'X_moduli_plot_batch_'+str(batch_size)+'.png'
 plt.savefig(path)
 plt.show()
 
@@ -114,7 +122,7 @@ ax.spines['bottom'].set_linewidth(5)
 ax.spines['top'].set_linewidth(5)
 ax.spines['left'].set_linewidth(5)
 ax.spines['right'].set_linewidth(5)
-path = 'Y_moduli_plot_batch_'+str(batch_size)+'.png'
+path = output_path+'Y_moduli_plot_batch_'+str(batch_size)+'.png'
 plt.savefig(path)
 plt.show()
 
@@ -131,6 +139,6 @@ ax.spines['bottom'].set_linewidth(5)
 ax.spines['top'].set_linewidth(5)
 ax.spines['left'].set_linewidth(5)
 ax.spines['right'].set_linewidth(5)
-path = 'Z_moduli_plot_batch_'+str(batch_size)+'.png'
+path = output_path+'Z_moduli_plot_batch_'+str(batch_size)+'.png'
 plt.savefig(path)
 plt.show()
